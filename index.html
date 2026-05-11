@@ -1679,27 +1679,36 @@ function renderNetwork(){
 }
 
 /* ════════════════════════════════════════════════════════════════════════
-   FILTRO 15 — ANIMALS
-   Detecta gestos de la mano y muestra el animal correspondiente.
-   Inspirado en animal-gesture (Kelly Gutierrez).
+   FILTRO 15 — ANIMALS (animal-gesture · Kelly Gutierrez)
+   Detecta gestos y muestra las imágenes reales del proyecto original.
 ════════════════════════════════════════════════════════════════════════ */
 const ANIMAL_MAP = {
-  thumbsup:  { emoji:'🐱', name:'GATO',    desc:'pulgar arriba' },
-  peace:     { emoji:'🐹', name:'HÁMSTER', desc:'señal de paz' },
-  openhand:  { emoji:'🐶', name:'PERRO',   desc:'mano abierta' },
-  fist:      { emoji:'🐻', name:'OSO',     desc:'puño cerrado' },
-  point:     { emoji:'🐰', name:'CONEJO',  desc:'apuntar' },
-  shaka:     { emoji:'🦜', name:'LORO',    desc:'shaka' },
+  thumbsup: { file:'gato.jpg',    name:'GATO' },
+  openhand: { file:'gato2.jpg',   name:'GATO' },
+  point:    { file:'gato3.jpg',   name:'GATO' },
+  shaka:    { file:'gato4.jpg',   name:'GATO' },
+  peace:    { file:'hamster.jpg', name:'HÁMSTER' },
+  fist:     { file:'hamster2.jpg',name:'HÁMSTER' },
 };
 
 const ANIMAL_GUIDE = [
-  ['👍', 'Pulgar arriba → 🐱'],
-  ['✌️', 'Paz → 🐹'],
-  ['🖐', 'Mano abierta → 🐶'],
-  ['✊', 'Puño → 🐻'],
-  ['☝️', 'Apuntar → 🐰'],
-  ['🤙', 'Shaka → 🦜'],
+  ['👍', 'Pulgar arriba'],
+  ['✌️', 'Paz'],
+  ['🖐', 'Mano abierta'],
+  ['✊', 'Puño'],
+  ['☝️', 'Apuntar'],
+  ['🤙', 'Shaka'],
 ];
+
+/* Precargar imágenes */
+const animalImgs = {};
+Object.entries(ANIMAL_MAP).forEach(([key, {file}]) => {
+  if (!animalImgs[file]) {
+    const img = new Image();
+    img.src = `imagenes/${file}`;
+    animalImgs[file] = img;
+  }
+});
 
 let animalCurrent = null;
 let animalTimer   = 0;
@@ -1707,24 +1716,22 @@ let animalAlpha   = 0;
 
 function detectGesture(lms) {
   if (!lms) return null;
-  const idx  = lms[8].sy  < lms[6].sy;
-  const mid  = lms[12].sy < lms[10].sy;
-  const ring = lms[16].sy < lms[14].sy;
-  const pink = lms[20].sy < lms[18].sy;
-  const thumb = lms[4].sy < lms[2].sy;
+  const idx   = lms[8].sy  < lms[6].sy;
+  const mid   = lms[12].sy < lms[10].sy;
+  const ring  = lms[16].sy < lms[14].sy;
+  const pink  = lms[20].sy < lms[18].sy;
+  const thumb = lms[4].sy  < lms[2].sy;
 
-  if (!idx && !mid && !ring && !pink) {
-    return thumb ? 'thumbsup' : 'fist';
-  }
-  if (idx && mid && ring && pink) return 'openhand';
-  if (idx && mid && !ring && !pink) return 'peace';
-  if (idx && !mid && !ring && !pink) return 'point';
+  if (!idx && !mid && !ring && !pink) return thumb ? 'thumbsup' : 'fist';
+  if (idx && mid && ring && pink)     return 'openhand';
+  if (idx && mid && !ring && !pink)   return 'peace';
+  if (idx && !mid && !ring && !pink)  return 'point';
   if (thumb && !idx && !mid && !ring && pink) return 'shaka';
   return null;
 }
 
 function renderAnimals() {
-  const lms = handsData.length ? handsData[0].landmarks : null;
+  const lms     = handsData.length ? handsData[0].landmarks : null;
   const gesture = detectGesture(lms);
 
   if (gesture && ANIMAL_MAP[gesture]) {
@@ -1735,44 +1742,48 @@ function renderAnimals() {
   const elapsed = T - animalTimer;
   const showing = animalCurrent && elapsed < 90;
 
-  animalAlpha += showing ? (1 - animalAlpha) * 0.12 : (0 - animalAlpha) * 0.08;
-  if (animalAlpha < 0.01 && !showing) animalCurrent = null;
+  animalAlpha += showing ? (1 - animalAlpha) * 0.14 : (0 - animalAlpha) * 0.08;
+  if (animalAlpha < 0.01 && !showing) { animalCurrent = null; }
 
   ctx.save();
 
   if (animalCurrent && animalAlpha > 0.01) {
-    /* emoji grande centrado */
-    const emojiSz = Math.min(W, H) * 0.28;
-    ctx.font = `${emojiSz}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const bounce = showing ? Math.sin((T - animalTimer) * 0.18) * 6 : 0;
-    ctx.globalAlpha = animalAlpha;
-    ctx.fillText(animalCurrent.emoji, W/2, H/2 - emojiSz * 0.1 + bounce);
+    const img = animalImgs[animalCurrent.file];
+    if (img && img.complete && img.naturalWidth) {
+      /* imagen centrada, máximo 55% del lado menor de pantalla */
+      const maxSz = Math.min(W, H) * 0.55;
+      const scale = Math.min(maxSz / img.naturalWidth, maxSz / img.naturalHeight);
+      const iw = img.naturalWidth  * scale;
+      const ih = img.naturalHeight * scale;
+      const ix = (W - iw) / 2;
+      const iy = (H - ih) / 2 - 24;
 
-    /* nombre del animal */
-    ctx.font = `700 ${Math.min(W * 0.09, 48)}px 'Space Grotesk', sans-serif`;
-    ctx.fillStyle = '#fff';
-    ctx.shadowColor = ACCENT; ctx.shadowBlur = 24;
-    ctx.fillText(animalCurrent.name, W/2, H/2 + emojiSz * 0.62 + bounce);
+      /* sombra suave detrás de la imagen */
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur  = 28;
+      ctx.globalAlpha = animalAlpha;
+      ctx.drawImage(img, ix, iy, iw, ih);
+      ctx.shadowBlur  = 0;
 
-    /* descripción gesto */
-    ctx.font = `500 ${Math.min(W * 0.038, 16)}px Inter, sans-serif`;
-    ctx.fillStyle = `rgba(${A},0.72)`;
-    ctx.shadowBlur = 0;
-    ctx.fillText(animalCurrent.desc.toUpperCase(), W/2, H/2 + emojiSz * 0.62 + 30 + bounce);
+      /* nombre del animal debajo */
+      ctx.font      = `700 ${Math.min(W * 0.08, 42)}px 'Space Grotesk', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = '#fff';
+      ctx.shadowColor = ACCENT; ctx.shadowBlur = 20;
+      ctx.fillText(animalCurrent.name, W/2, iy + ih + 12);
+      ctx.shadowBlur = 0;
+    }
     ctx.globalAlpha = 1;
   }
 
-  /* guía de gestos (siempre visible, esquina superior-izquierda) */
-  if (!lms || !showing) {
+  /* guía de gestos */
+  if (!showing) {
     const gx = 20, gy = 130, step = 26;
     ctx.font = '500 12px Inter, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ANIMAL_GUIDE.forEach(([icon, label], i) => {
-      const a = lms ? 0.28 : 0.52;
-      ctx.fillStyle = `rgba(255,255,255,${a})`;
+      ctx.fillStyle = `rgba(255,255,255,${lms ? 0.28 : 0.55})`;
       ctx.fillText(`${icon}  ${label}`, gx, gy + i * step);
     });
   }
@@ -1782,8 +1793,7 @@ function renderAnimals() {
     ctx.textAlign = 'center';
     ctx.font = `500 ${Math.min(W * 0.045, 18)}px Inter, sans-serif`;
     ctx.fillStyle = `rgba(${A},0.6)`;
-    const pulse = 0.5 + 0.5 * Math.sin(T * 0.05);
-    ctx.globalAlpha = 0.5 + pulse * 0.5;
+    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(T * 0.05);
     ctx.fillText('MUESTRA TU MANO A LA CÁMARA', W/2, H/2);
     ctx.globalAlpha = 1;
   }
