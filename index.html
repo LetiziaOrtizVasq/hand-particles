@@ -1321,7 +1321,7 @@ let ball={x:0,y:0,vx:0,vy:0}, paddle={x:0,y:0,w:0,h:0};
 let bricks=[], gameScore=0, gameReady=false, gameLives=3;
 
 function initGame() {
-  const spd=Math.min(W,H)*.0065;
+  const spd=Math.min(W,H)*.012;
   ball={x:W/2, y:H*.72, vx:spd*.8, vy:-spd};
   paddle={x:W/2-W*.07, y:H*.82, w:W*.14, h:Math.max(10,H*.014)};
   bricks=[]; gameScore=0; gameLives=3;
