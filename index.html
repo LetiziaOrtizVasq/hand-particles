@@ -1775,26 +1775,17 @@ function renderAnimals() {
       ctx.globalAlpha = animalAlpha;
       ctx.drawImage(img, ix, iy, iw, ih);
       ctx.shadowBlur  = 0;
-
-      /* nombre del animal debajo */
-      ctx.font      = `700 ${Math.min(W * 0.08, 42)}px 'Space Grotesk', sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillStyle = '#fff';
-      ctx.shadowColor = ACCENT; ctx.shadowBlur = 20;
-      ctx.fillText(animalCurrent.name, W/2, iy + ih + 12);
-      ctx.shadowBlur = 0;
     }
     ctx.globalAlpha = 1;
   }
 
-  /* guía de gestos */
-  if (!showing) {
+  /* guía de gestos — siempre fija, esquina superior izquierda */
+  {
     const gx = 20, gy = 130, step = 26;
     ctx.font = '500 12px Inter, sans-serif';
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ANIMAL_GUIDE.forEach(([icon, label], i) => {
-      ctx.fillStyle = `rgba(255,255,255,${lms ? 0.28 : 0.55})`;
+      ctx.fillStyle = showing ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.55)';
       ctx.fillText(`${icon}  ${label}`, gx, gy + i * step);
     });
   }
