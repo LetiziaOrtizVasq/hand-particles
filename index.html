@@ -138,24 +138,35 @@
 
     /* ─── MOBILE ─────────────────────────────────────────────────────── */
     @media (max-width: 640px) {
-      #logo        { padding: 10px 14px 0; }
-      .logo-eyebrow{ font-size: 7px; letter-spacing: 3px; }
-      .logo-title  { font-size: 26px; }
-      .logo-sub    { font-size: 7px; letter-spacing: 4px; }
-      #cam-toggle  { top: 8px; right: 8px; }
-      .cbtn        { padding: 5px 8px; font-size: 8px; }
+      /* Logo compacto: solo muestra "PromoUPSA" pequeño */
+      #logo           { padding: 8px 14px 0; }
+      .logo-eyebrow   { display: none; }
+      .logo-title     { font-size: 20px; letter-spacing: -0.5px; }
+      .logo-sub       { display: none; }
+
+      /* Cam toggle pegado a la derecha del logo */
+      #cam-toggle     { top: 6px; right: 8px; }
+      .cbtn           { padding: 5px 8px; font-size: 8px; }
+
+      /* Barra inferior: scroll horizontal, sin wrap */
       #bar {
         flex-wrap: nowrap;
         overflow-x: auto;
         justify-content: flex-start;
-        padding: 10px 12px 18px;
+        padding: 8px 10px;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
         gap: 4px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
       }
       #bar::-webkit-scrollbar { display: none; }
-      .btn         { flex-shrink: 0; padding: 9px 13px; font-size: 10px; }
-      #subbar      { bottom: 62px; }
+
+      /* Botones más altos para touch */
+      .btn  { flex-shrink: 0; padding: 10px 14px; font-size: 10px; }
+      .fbtn { padding: 8px 14px; font-size: 9px; }
+
+      /* Subbar sube según altura real de la barra */
+      #subbar { bottom: calc(52px + env(safe-area-inset-bottom)); }
     }
 
     /* ─── LOADING ────────────────────────────────────────────────────── */
