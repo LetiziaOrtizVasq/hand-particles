@@ -221,8 +221,8 @@
 <!-- ─── CAM TOGGLE ────────────────────────────────────────────────────── -->
 <div id="cam-toggle">
   <div class="cbtn active" data-cam="color">Color</div>
-  <div class="cbtn" data-cam="bw">B&amp;W</div>
-  <div class="cbtn" data-cam="none">None</div>
+  <div class="cbtn" data-cam="bw">B/N</div>
+  <div class="cbtn" data-cam="none">Sin cám</div>
 </div>
 
 <!-- ─── UI BARS ───────────────────────────────────────────────────────── -->
@@ -268,21 +268,21 @@ const A = '91,181,58';        // --accent-rgb
 const ACCENT = '#5bb53a';
 
 const MODE_LIST = [
-  {id:'particles', label:'Particles'},
-  {id:'garden',    label:'Garden'},
-  {id:'face',      label:'Face'},
-  {id:'twohands',  label:'Two Hands'},
-  {id:'binary',    label:'Binary'},
-  {id:'circuit',   label:'Circuit'},
-  {id:'wireframe', label:'Wireframe'},
-  {id:'soundwave', label:'Sound Wave'},
+  {id:'particles', label:'Partículas'},
+  {id:'garden',    label:'Jardín'},
+  {id:'face',      label:'Rostro'},
+  {id:'twohands',  label:'Dos Manos'},
+  {id:'binary',    label:'Binario'},
+  {id:'circuit',   label:'Circuito'},
+  {id:'wireframe',  label:'Malla 3D'},
+  {id:'soundwave', label:'Onda Sonora'},
   {id:'hacker',    label:'Hacker'},
-  {id:'aiscan',    label:'AI Scan'},
-  {id:'game',      label:'Game'},
-  {id:'robotarm',  label:'Robot Arm'},
-  {id:'dna',       label:'DNA'},
-  {id:'network',   label:'Network'},
-  {id:'animals',   label:'Animals'},
+  {id:'aiscan',    label:'Escaneo IA'},
+  {id:'game',      label:'Juego'},
+  {id:'robotarm',  label:'Brazo Robot'},
+  {id:'dna',       label:'ADN'},
+  {id:'network',   label:'Red'},
+  {id:'animals',   label:'Animales'},
 ];
 const CAM_MODES = ['color','bw','none'];
 
@@ -1001,7 +1001,7 @@ function renderWireframe() {
   ctx.beginPath(); ctx.moveTo(0,scanY); ctx.lineTo(W,scanY); ctx.stroke();
   ctx.setLineDash([]);
   ctx.fillStyle=`rgba(${A},.5)`; ctx.font='500 9px Inter,sans-serif'; ctx.textAlign='right';
-  ctx.fillText('SCANNING',W-18,scanY-5);
+  ctx.fillText('ESCANEANDO',W-18,scanY-5);
   ctx.restore();
 }
 
@@ -1832,18 +1832,24 @@ function renderSkeleton() {
 function frame() {
   T++;
 
-  /* 1. Imagen de cámara (espejada, con filtro seleccionado) */
+  /* 1. Imagen de cámara (espejada) */
   ctx.save();
   if (camMode !== 'none') {
-    ctx.filter = camMode==='bw'
-      ? 'grayscale(1) brightness(.82)'
-      : 'brightness(.9) contrast(1.06)';
     ctx.scale(-1,1); ctx.translate(-W,0);
     ctx.drawImage(vid,0,0,W,H);
   } else {
+    ctx.scale(-1,1); ctx.translate(-W,0);
     ctx.fillStyle='#050508'; ctx.fillRect(0,0,W,H);
   }
   ctx.restore();
+  /* B/N via composición — compatible con móvil (evita ctx.filter) */
+  if (camMode === 'bw') {
+    ctx.save();
+    ctx.globalCompositeOperation = 'saturation';
+    ctx.fillStyle = 'hsl(0,0%,40%)';
+    ctx.fillRect(0,0,W,H);
+    ctx.restore();
+  }
 
   /* 2. Viñeta oscura para contraste de efectos */
   ctx.fillStyle='rgba(0,0,0,.26)'; ctx.fillRect(0,0,W,H);
