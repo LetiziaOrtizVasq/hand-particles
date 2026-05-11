@@ -1005,9 +1005,34 @@ function renderWireframe() {
 
 /* ════════════════════════════════════════════════════════════════════════
    FILTRO 8 — SOUND WAVE
-   Ondas concéntricas desde la palma + forma de onda horizontal.
+   Ondas concéntricas desde la palma + forma de onda horizontal + AUDIO.
 ════════════════════════════════════════════════════════════════════════ */
 let waves=[], waveT=0;
+
+/* ── Web Audio API ── */
+let _actx=null, _osc=null, _gain=null, _filt=null, _audioOn=false;
+
+function _initAudio() {
+  if (_actx) return;
+  _actx  = new (window.AudioContext||window.webkitAudioContext)();
+  _gain  = _actx.createGain();   _gain.gain.value = 0;
+  _filt  = _actx.createBiquadFilter();
+  _filt.type = 'lowpass'; _filt.frequency.value = 800;
+  _osc   = _actx.createOscillator();
+  _osc.type = 'sine'; _osc.frequency.value = 440;
+  _osc.connect(_filt); _filt.connect(_gain); _gain.connect(_actx.destination);
+  _osc.start();
+}
+function startAudio() {
+  _initAudio();
+  if (_actx.state==='suspended') _actx.resume();
+  _audioOn = true;
+}
+function stopAudio() {
+  if (!_actx) return;
+  _gain.gain.setTargetAtTime(0, _actx.currentTime, 0.15);
+  _audioOn = false;
+}
 
 function Wave(x,y,spd) {
   this.x=x; this.y=y; this.r=0;
@@ -1033,8 +1058,20 @@ function renderSoundWave() {
       if (waveT%11===0) for(let i=0;i<3;i++) waves.push(new Wave(pc.x+(Math.random()-.5)*18,pc.y+(Math.random()-.5)*18,2+i*1.1));
       if (waveT%22===0) [4,8,12,16,20].forEach(ti=>waves.push(new Wave(hand.landmarks[ti].sx,hand.landmarks[ti].sy,1.5+Math.random())));
     });
+    /* ── Audio: mano controla tono y volumen ── */
+    if (_audioOn) {
+      const lms = handsData[0].landmarks;
+      const pc  = palmCenter(lms);
+      const open = measureOpen(lms);
+      const freq = 150 + (1 - pc.y/H) * 700;   // arriba=agudo, abajo=grave
+      const vol  = 0.05 + open * 0.35;
+      _osc.frequency.setTargetAtTime(freq, _actx.currentTime, 0.04);
+      _filt.frequency.setTargetAtTime(400 + (pc.x/W)*2400, _actx.currentTime, 0.04);
+      _gain.gain.setTargetAtTime(vol, _actx.currentTime, 0.04);
+    }
   } else {
     if (waveT%22===0) for(let i=0;i<3;i++) waves.push(new Wave(W/2,H*.5,1.4+i*.8));
+    if (_audioOn) _gain.gain.setTargetAtTime(0, _actx.currentTime, 0.2);
   }
   ctx.save();
   waves=waves.filter(w=>w.a>.01);
@@ -1939,9 +1976,11 @@ async function startCam(mp) {
    UI — BOTONES Y EVENTOS
 ════════════════════════════════════════════════════════════════════════ */
 function setMode(id) {
+  if (mode==='soundwave' && id!=='soundwave') stopAudio();
   mode=id;
   document.querySelectorAll('.btn[data-id]').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   sub.classList.toggle('show',id==='garden');
+  if (id==='soundwave') startAudio();
 }
 function setFlower(i) {
   flowerIdx=i;
