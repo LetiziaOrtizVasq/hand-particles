@@ -2222,7 +2222,7 @@ function _anFingersUp(lm) {
   const tips = [4, 8, 12, 16, 20];
   const pips = [3, 7, 11, 15, 19];
   const f = [];
-  f.push(Math.abs(lm[4].x/W - lm[2].x/W) > 0.06 ? 1 : 0); // pulgar: distancia horizontal
+  f.push(Math.abs(lm[4].x - lm[2].x) > 0.06 ? 1 : 0); // pulgar: distancia horizontal
   for (let i = 1; i < 5; i++) f.push(lm[tips[i]].y < lm[pips[i]].y ? 1 : 0);
   return f;
 }
@@ -2242,10 +2242,9 @@ function detectAnimalGesture() {
     const sum1 = f1.reduce((a,b)=>a+b,0), sum2 = f2.reduce((a,b)=>a+b,0);
     /* Manos en cabeza: ambas abiertas, muñecas altas, a los lados, dedos hacia arriba, separadas */
     if (sum1 >= 4 && sum2 >= 4 &&
-        h1[0].y/H < 0.62 && h2[0].y/H < 0.62 &&
-        h1[0].x/W < 0.42 && h2[0].x/W > 0.58 &&
+        h1[0].y < 0.62 && h2[0].y < 0.62 &&
         h1[8].y < h1[0].y && h2[8].y < h2[0].y &&
-        Math.abs(h1[0].x/W - h2[0].x/W) > 0.28) return 'HANDS_HEAD';
+        Math.abs(h1[0].x - h2[0].x) > 0.28) return 'HANDS_HEAD';
     /* Doble puño */
     if ((_anIsFist(h1) && _anIsFist(h2)) || (sum1 <= 1 && sum2 <= 1)) return 'DOUBLE_FIST';
   }
