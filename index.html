@@ -2240,11 +2240,10 @@ function detectAnimalGesture() {
     const h1 = handsData[0].landmarks, h2 = handsData[1].landmarks;
     const f1 = _anFingersUp(h1), f2 = _anFingersUp(h2);
     const sum1 = f1.reduce((a,b)=>a+b,0), sum2 = f2.reduce((a,b)=>a+b,0);
-    /* Manos en cabeza: ambas abiertas, muñecas altas, a los lados, dedos hacia arriba, separadas */
-    if (sum1 >= 4 && sum2 >= 4 &&
-        h1[0].y < 0.62 && h2[0].y < 0.62 &&
-        h1[8].y < h1[0].y && h2[8].y < h2[0].y &&
-        Math.abs(h1[0].x - h2[0].x) > 0.28) return 'HANDS_HEAD';
+    /* Manos en cabeza: ambas abiertas, muñecas en mitad superior, separadas */
+    if (sum1 >= 3 && sum2 >= 3 &&
+        h1[0].y < 0.80 && h2[0].y < 0.80 &&
+        Math.abs(h1[0].x - h2[0].x) > 0.18) return 'HANDS_HEAD';
     /* Doble puño */
     if ((_anIsFist(h1) && _anIsFist(h2)) || (sum1 <= 1 && sum2 <= 1)) return 'DOUBLE_FIST';
   }
@@ -2257,16 +2256,16 @@ function detectAnimalGesture() {
       lm[16].y > lm[14].y && lm[20].y > lm[18].y) return 'THUMBS_UP';
 
   /* Shocker izquierdo: pulgar + meñique arriba, otros abajo */
-  const thumb = Math.abs(lm[4].x/W - lm[2].x/W) > 0.06 || lm[4].y < lm[3].y;
+  const thumb = Math.abs(lm[4].x - lm[2].x) > 0.06 || lm[4].y < lm[3].y;
   if (thumb && lm[20].y < lm[18].y &&
       lm[8].y > lm[6].y && lm[12].y > lm[10].y && lm[16].y > lm[14].y) return 'LEFT_SHOCKER';
 
   /* Paz: solo índice + medio arriba */
   if (f[0]===0 && f[1]===1 && f[2]===1 && f[3]===0 && f[4]===0) return 'PEACE';
 
-  /* Mano abierta centrada */
-  const cx = lm.reduce((s,p) => s + p.x/W, 0) / lm.length;
-  if (f.reduce((a,b)=>a+b,0) > 4 && cx > 0.35 && cx < 0.65) return 'OPEN_HAND';
+  /* Mano abierta */
+  const cx = lm.reduce((s,p) => s + p.x, 0) / lm.length;
+  if (f.reduce((a,b)=>a+b,0) >= 3 && cx > 0.15 && cx < 0.85) return 'OPEN_HAND';
 
   return 'NONE';
 }
