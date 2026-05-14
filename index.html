@@ -646,8 +646,8 @@ const CONN = [
 ];
 
 /* Color UPSA en distintos contextos */
-const A = '3,84,71';          // --accent-rgb
-const ACCENT = '#035447';
+const A = '0,0,0';            // --accent-rgb
+const ACCENT = '#000000';
 
 const MODE_LIST = [
   {id:'particles', label:'Particles'},
@@ -684,7 +684,7 @@ function measureOpen(lms) {
    FILTRO 1 — PARTICLES
    Partículas forman "PromoUPSA 2026"; la mano las dispersa.
 ════════════════════════════════════════════════════════════════════════ */
-const PCOUNT = 2600;
+const PCOUNT = 4200;
 let particles = [];
 
 function Particle(hx, hy, isText) {
@@ -725,10 +725,9 @@ Particle.prototype.update = function() {
 };
 
 Particle.prototype.draw = function() {
-  const col = this.useAccent ? A : '255,255,255';
   ctx.beginPath();
   ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
-  ctx.fillStyle = `rgba(${col},${this.alpha})`;
+  ctx.fillStyle = `rgba(0,0,0,${this.alpha})`;
   ctx.fill();
 };
 
@@ -739,10 +738,9 @@ function sampleText() {
   const o = off.getContext('2d');
   const topOff=115, botOff=62;
   const cx=W/2, cy=topOff+(H-topOff-botOff)/2;
-  const fs1=Math.min(W/7,108), fs2=Math.min(W/4.5,148);
+  const fs1=Math.min(W/4.5, 160);
   o.textAlign='center'; o.textBaseline='middle'; o.fillStyle='#fff';
-  o.font=`700 ${fs1}px 'Space Grotesk',sans-serif`; o.fillText('PromoUPSA',cx,cy-fs1*.72);
-  o.font=`700 ${fs2}px 'Space Grotesk',sans-serif`; o.fillText('2026',cx,cy+fs2*.55);
+  o.font=`700 ${fs1}px 'Space Grotesk',sans-serif`; o.fillText('PROMO UPSA',cx,cy);
   const px=o.getImageData(0,0,W,H).data;
   const step=Math.max(3,Math.floor(Math.sqrt(W*H/50000)));
   const out=[];
@@ -769,10 +767,7 @@ function initParticles() {
 }
 
 function renderParticles() {
-  ctx.save();
-  ctx.globalCompositeOperation='lighter';
   particles.forEach(p=>{ p.update(); p.draw(); });
-  ctx.restore();
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -788,8 +783,7 @@ function renderParticles() {
 let gardenOpen = 0;
 let flowerIdx  = 0;
 const FLOWER_DEFS = [
-  {label:'Pixel Daisy'}, {label:'Pixel Sunray'},
-  {label:'Pixel Tulip'}, {label:'Pixel Rose'},
+  {label:'Pixel Daisy'}, {label:'Pixel Sunray'}, {label:'Pixel Rose'},
 ];
 
 const bfCvs = document.createElement('canvas');
@@ -797,9 +791,9 @@ const bfCtx = bfCvs.getContext('2d');
 
 function drawBitmapPetal(type, cx, cy, open) {
   const fc = bfCtx;
-  fc.fillStyle = 'rgba(3,84,71,0.92)';
+  fc.fillStyle = 'rgba(0,0,0,0.92)';
   const o = Math.max(0.05, open);
-  const sz = Math.floor(14 + o * 14);
+  const sz = Math.floor(26 + o * 26);
 
   if (type === 0) {
     /* Daisy: 8 pétalos radiantes */
@@ -837,20 +831,6 @@ function drawBitmapPetal(type, cx, cy, open) {
       }
     }
 
-  } else if (type === 2) {
-    /* Tulip: 3 óvalos hacia arriba */
-    [-1, 0, 1].forEach((off, i) => {
-      const bx = cx + off * Math.floor(sz * 0.38 * o);
-      const pw = Math.floor(sz * (i === 1 ? 0.32 : 0.25));
-      const ph = Math.floor(sz * 0.78 * (0.35 + 0.65 * o));
-      for (let dx = -pw; dx <= pw; dx++) {
-        for (let dy = -ph; dy <= 0; dy++) {
-          if ((dx/pw)*(dx/pw) + (dy/ph)*(dy/ph) <= 1)
-            fc.fillRect(bx + dx, cy + dy, 1, 1);
-        }
-      }
-    });
-
   } else {
     /* Rose: espiral de arcos anidados */
     const layers = Math.max(1, Math.floor(2 + o * 3));
@@ -886,17 +866,17 @@ function renderGarden() {
     : (gardenOpen = .38 + Math.sin(T * .018) * .18, gardenOpen);
 
   const cx = Math.floor(fw / 2);
-  const cy = Math.floor(fh * 0.30);
+  const cy = Math.floor(fh * 0.50);
 
   /* Tallo */
-  bfCtx.fillStyle = 'rgba(3,84,71,0.55)';
+  bfCtx.fillStyle = 'rgba(0,0,0,0.55)';
   for (let y = cy + 10; y < fh; y++) {
     const sw = y > fh - 8 ? 2 : 1;
     const sway = Math.round(Math.sin(y * 0.09 + T * 0.008) * 0.6);
     bfCtx.fillRect(cx + sway - Math.floor(sw/2), y, sw, 1);
   }
   /* Hojas */
-  bfCtx.fillStyle = 'rgba(3,84,71,0.38)';
+  bfCtx.fillStyle = 'rgba(0,0,0,0.38)';
   const ly1 = Math.floor(fh * 0.52), ly2 = Math.floor(fh * 0.67);
   for (let i = 0; i < 7; i++) { bfCtx.fillRect(cx + 1 + i, ly1 - i, 1, 1); }
   for (let i = 0; i < 7; i++) { bfCtx.fillRect(cx - 1 - i, ly2 - i, 1, 1); }
@@ -907,7 +887,7 @@ function renderGarden() {
   /* Destellos al abrirse completamente */
   if (open > 0.82) {
     const a = (open - 0.82) / 0.18;
-    bfCtx.fillStyle = `rgba(3,84,71,${a * 0.9})`;
+    bfCtx.fillStyle = `rgba(0,0,0,${a * 0.9})`;
     for (let s = 0; s < 12; s++) {
       const sa = (s / 12) * Math.PI * 2 + T * 0.022;
       const sr = Math.floor(14 + open * 12 + Math.sin(T * 0.07 + s) * 2);
@@ -924,7 +904,7 @@ function renderGarden() {
   ctx.imageSmoothingEnabled = true;
 
   /* Etiqueta de flor */
-  ctx.fillStyle = 'rgba(3,84,71,0.55)';
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
   ctx.font = `300 9px 'IBM Plex Mono', monospace`;
   ctx.textAlign = 'center';
   ctx.fillText(FLOWER_DEFS[flowerIdx].label.toUpperCase(), W / 2, H - 82);
@@ -963,7 +943,7 @@ function renderFaceHUD() {
     ctx.strokeStyle=`rgba(${A},.1)`; ctx.lineWidth=0.6; ctx.setLineDash([3,9]);
     ctx.beginPath(); ctx.moveTo(0,faceScroll); ctx.lineTo(W,faceScroll); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.font='500 11px Inter,sans-serif'; ctx.fillStyle=`rgba(${A},.35)`;
+    ctx.font='500 11px Inter,sans-serif'; ctx.fillStyle='rgba(255,255,255,.6)';
     ctx.textAlign='center'; ctx.fillText('ESCANEANDO ROSTROS...',W/2,H/2);
     ctx.restore();
     return;
@@ -1037,10 +1017,10 @@ function renderFaceHUD() {
 
     /* textos del panel */
     ctx.textAlign='left';
-    ctx.font=`700 11px Inter,sans-serif`; ctx.fillStyle=ACCENT;
+    ctx.font=`700 11px Inter,sans-serif`; ctx.fillStyle='rgba(255,255,255,.95)';
     ctx.fillText('FUTURO INGENIERO DETECTADO', bx+8, labelY+16);
 
-    ctx.font='400 9px Inter,sans-serif'; ctx.fillStyle=`rgba(${A},.65)`;
+    ctx.font='400 9px Inter,sans-serif'; ctx.fillStyle='rgba(255,255,255,.65)';
     ctx.fillText(`ID: ${fid.id}`, bx+8, labelY+30);
     ctx.textAlign='right';
     ctx.fillText(`CONF: ${fid.conf}%`, bx+bw-8, labelY+30);
@@ -1048,7 +1028,7 @@ function renderFaceHUD() {
     ctx.textAlign='left';
     const lat=(-17.783+(Math.random()-.5)*.0015).toFixed(5);
     const lon=(-63.182+(Math.random()-.5)*.0015).toFixed(5);
-    ctx.fillStyle=`rgba(${A},.42)`;
+    ctx.fillStyle='rgba(255,255,255,.42)';
     ctx.fillText(`LAT ${lat}  ·  LON ${lon}`, bx+8, labelY+44);
 
     ctx.restore();
@@ -1438,7 +1418,7 @@ const HACK_CMDS = [
 let hkCols = [];
 
 function initHacker() {
-  const n = Math.max(8, Math.ceil(W / 260));
+  const n = Math.max(18, Math.ceil(W / 120));
   hkCols = Array.from({length: n}, (_, i) => ({
     x: (i / n) * W + Math.random() * (W/n * 0.6),
     y: -Math.random() * H,
@@ -1474,7 +1454,7 @@ function renderHacker() {
     if (near && Math.random() < 0.06) col.cmd = HACK_CMDS[Math.random()*HACK_CMDS.length|0];
 
     const a = near ? Math.min(1, col.alpha*2.4) : col.alpha;
-    ctx.font = `${col.bright?'600':'400'} ${col.bright?11:10}px 'Courier New',monospace`;
+    ctx.font = `${col.bright?'600':'400'} ${col.bright?15:13}px 'Courier New',monospace`;
 
     if (col.bright || near) {
       ctx.shadowColor = ACCENT; ctx.shadowBlur = near ? 14 : 6;
@@ -2024,120 +2004,8 @@ function renderNetwork(){
   drawTagline('esto diseñan los ingenieros de sistemas');
 }
 
-/* ════════════════════════════════════════════════════════════════════════
-   FILTRO 15 — ANIMALS (animal-gesture · Kelly Gutierrez)
-   Detecta gestos y muestra las imágenes reales del proyecto original.
-════════════════════════════════════════════════════════════════════════ */
-const ANIMAL_MAP = {
-  thumbsup: { file:'gato.jpg',    name:'GATO' },
-  openhand: { file:'gato2.jpg',   name:'GATO' },
-  point:    { file:'gato3.jpg',   name:'GATO' },
-  shaka:    { file:'gato4.jpg',   name:'GATO' },
-  peace:    { file:'hamster.jpg', name:'HÁMSTER' },
-  fist:     { file:'hamster2.jpg',name:'HÁMSTER' },
-};
+/* bloque animals viejo eliminado — ver renderAnimalGesture() */
 
-const ANIMAL_GUIDE = [
-  ['👍', 'Pulgar arriba'],
-  ['✌️', 'Paz'],
-  ['🖐', 'Mano abierta'],
-  ['✊', 'Puño'],
-  ['☝️', 'Apuntar'],
-  ['🤙', 'Shaka'],
-];
-
-/* Precargar imágenes */
-const animalImgs = {};
-Object.entries(ANIMAL_MAP).forEach(([key, {file}]) => {
-  if (!animalImgs[file]) {
-    const img = new Image();
-    img.src = `imagenes/${file}`;
-    animalImgs[file] = img;
-  }
-});
-
-let animalCurrent = null;
-let animalTimer   = 0;
-let animalAlpha   = 0;
-
-function detectGesture(lms) {
-  if (!lms) return null;
-  const idx   = lms[8].sy  < lms[6].sy;
-  const mid   = lms[12].sy < lms[10].sy;
-  const ring  = lms[16].sy < lms[14].sy;
-  const pink  = lms[20].sy < lms[18].sy;
-  const thumb = lms[4].sy  < lms[2].sy;
-
-  if (!idx && !mid && !ring && !pink) return thumb ? 'thumbsup' : 'fist';
-  if (idx && mid && ring && pink)     return 'openhand';
-  if (idx && mid && !ring && !pink)   return 'peace';
-  if (idx && !mid && !ring && !pink)  return 'point';
-  if (thumb && !idx && !mid && !ring && pink) return 'shaka';
-  return null;
-}
-
-function renderAnimals() {
-  const lms     = handsData.length ? handsData[0].landmarks : null;
-  const gesture = detectGesture(lms);
-
-  if (gesture && ANIMAL_MAP[gesture]) {
-    animalCurrent = ANIMAL_MAP[gesture];
-    animalTimer   = T;
-  }
-
-  const elapsed = T - animalTimer;
-  const showing = animalCurrent && elapsed < 90;
-
-  animalAlpha += showing ? (1 - animalAlpha) * 0.14 : (0 - animalAlpha) * 0.08;
-  if (animalAlpha < 0.01 && !showing) { animalCurrent = null; }
-
-  ctx.save();
-
-  if (animalCurrent && animalAlpha > 0.01) {
-    const img = animalImgs[animalCurrent.file];
-    if (img && img.complete && img.naturalWidth) {
-      /* imagen centrada, máximo 55% del lado menor de pantalla */
-      const maxSz = Math.min(W, H) * 0.55;
-      const scale = Math.min(maxSz / img.naturalWidth, maxSz / img.naturalHeight);
-      const iw = img.naturalWidth  * scale;
-      const ih = img.naturalHeight * scale;
-      const ix = (W - iw) / 2;
-      const iy = (H - ih) / 2 - 24;
-
-      /* sombra suave detrás de la imagen */
-      ctx.shadowColor = 'rgba(0,0,0,0.6)';
-      ctx.shadowBlur  = 28;
-      ctx.globalAlpha = animalAlpha;
-      ctx.drawImage(img, ix, iy, iw, ih);
-      ctx.shadowBlur  = 0;
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  /* guía de gestos — siempre fija, esquina superior izquierda */
-  {
-    const gx = 20, gy = 130, step = 26;
-    ctx.font = '500 12px Inter, sans-serif';
-    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-    ANIMAL_GUIDE.forEach(([icon, label], i) => {
-      ctx.fillStyle = showing ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.55)';
-      ctx.fillText(`${icon}  ${label}`, gx, gy + i * step);
-    });
-  }
-
-  /* prompt si no hay mano */
-  if (!lms) {
-    ctx.textAlign = 'center';
-    ctx.font = `500 ${Math.min(W * 0.045, 18)}px Inter, sans-serif`;
-    ctx.fillStyle = `rgba(${A},0.6)`;
-    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(T * 0.05);
-    ctx.fillText('MUESTRA TU MANO A LA CÁMARA', W/2, H/2);
-    ctx.globalAlpha = 1;
-  }
-
-  ctx.restore();
-  drawTagline('detectamos tus gestos con inteligencia artificial');
-}
 
 /* ════════════════════════════════════════════════════════════════════════
    ESQUELETO GLOBAL (overlay sutil en modos que no tienen el suyo)
@@ -2274,6 +2142,7 @@ function setMode(id) {
     document.getElementById('gallery-panel').classList.remove('open');
     closeLightbox();
   }
+  if (id==='particles') initParticles();
 }
 function setFlower(i) {
   flowerIdx=i;
