@@ -881,12 +881,6 @@ function renderGarden() {
     const sway = Math.round(Math.sin(y * 0.09 + T * 0.008) * 0.6);
     bfCtx.fillRect(cx + sway - Math.floor(sw/2), y, sw, 1);
   }
-  /* Hojas */
-  bfCtx.fillStyle = 'rgba(0,0,0,0.38)';
-  const ly1 = Math.floor(fh * 0.52), ly2 = Math.floor(fh * 0.67);
-  for (let i = 0; i < 7; i++) { bfCtx.fillRect(cx + 1 + i, ly1 - i, 1, 1); }
-  for (let i = 0; i < 7; i++) { bfCtx.fillRect(cx - 1 - i, ly2 - i, 1, 1); }
-
   /* Flor */
   drawBitmapPetal(flowerIdx, cx, cy, open);
 
