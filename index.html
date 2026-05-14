@@ -727,8 +727,8 @@ Particle.prototype.update = function() {
 
 Particle.prototype.draw = function() {
   if (this.isText) {
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = `rgba(3,84,71,${this.alpha * 0.55})`;
+    ctx.shadowBlur = 18;
+    ctx.shadowColor = `rgba(3,84,71,${this.alpha * 0.85})`;
   }
   ctx.beginPath();
   ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
@@ -797,7 +797,7 @@ const bfCtx = bfCvs.getContext('2d');
 
 function drawBitmapPetal(type, cx, cy, open) {
   const fc = bfCtx;
-  fc.fillStyle = 'rgba(0,0,0,0.92)';
+  fc.fillStyle = 'rgba(3,84,71,0.92)';
   const o = Math.max(0.05, open);
   const sz = Math.floor(26 + o * 26);
 
@@ -2045,7 +2045,7 @@ function frame() {
     ctx.save();
     if (camMode !== 'none') {
       ctx.filter = camMode==='bw'
-        ? 'grayscale(1) brightness(1.48) contrast(1.35)'
+        ? 'grayscale(1) brightness(1.62) contrast(1.35)'
         : 'brightness(.9) contrast(1.06)';
       ctx.scale(-1,1); ctx.translate(-W,0);
       ctx.drawImage(vid,0,0,W,H);
