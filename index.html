@@ -2039,7 +2039,7 @@ function frame() {
     ctx.save();
     if (camMode !== 'none') {
       ctx.filter = camMode==='bw'
-        ? 'grayscale(1) brightness(1.18) contrast(1.1)'
+        ? 'grayscale(1) brightness(1.32) contrast(1.35)'
         : 'brightness(.9) contrast(1.06)';
       ctx.scale(-1,1); ctx.translate(-W,0);
       ctx.drawImage(vid,0,0,W,H);
